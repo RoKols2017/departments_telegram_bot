@@ -1,0 +1,48 @@
+# Основные зависимости
+aiogram==3.20.0.post0
+SQLAlchemy==2.0.41
+alembic==1.16.1
+python-dotenv==1.1.0
+APScheduler==3.11.0
+python-dateutil==2.9.0.post0
+pytz==2025.2
+aiohttp==3.11.18
+cryptography==45.0.2
+pydantic>=2.11.5
+loguru==0.7.3
+aiofiles==24.1.0
+babel==2.14.0
+typing-extensions>=4.11.0
+orjson==3.10.18
+
+# База данных
+psycopg2-binary==2.9.9
+aiosqlite==0.19.0
+SQLAlchemy[asyncio]==2.0.41
+
+# Тестирование
+pytest==8.1.1
+pytest-asyncio==0.23.5
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+pytest-env==1.1.3
+pytest-sugar==1.0.0
+coverage==7.4.1
+
+# Линтинг и форматирование
+flake8==7.0.0
+black==24.3.0
+isort==5.13.2
+mypy==1.9.0
+pylint==3.1.0
+
+# Безопасность
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+argon2-cffi==23.1.0
+
+# Дополнительные инструменты
+rich==13.7.0  # Для красивого вывода в консоль
+python-multipart==0.0.6  # Для обработки файлов
+humanize==4.9.0  # Для форматирования дат и чисел
+pytz-deprecation-shim==0.1.0.post0  # Для совместимости с APScheduler
