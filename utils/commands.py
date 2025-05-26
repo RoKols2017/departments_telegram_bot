@@ -1,7 +1,18 @@
+"""
+Утилиты для генерации команд Telegram-бота в зависимости от роли пользователя.
+"""
+
 from aiogram import Bot
 from aiogram.types import BotCommand, BotCommandScopeAllPrivateChats, BotCommandScopeChat
+from typing import List
 
-def get_default_commands():
+def get_default_commands() -> List[BotCommand]:
+    """
+    Возвращает список команд для обычного пользователя.
+
+    Returns:
+        List[BotCommand]: Список команд.
+    """
     return [
         BotCommand(command="menu", description="Открыть меню"),
         BotCommand(command="mydata", description="Мои данные"),
@@ -9,7 +20,13 @@ def get_default_commands():
         BotCommand(command="active_funds", description="Активные сборы")
     ]
 
-def get_admin_commands():
+def get_admin_commands() -> List[BotCommand]:
+    """
+    Возвращает список команд для администратора.
+
+    Returns:
+        List[BotCommand]: Список команд.
+    """
     return [
         BotCommand(command="menu", description="Открыть меню"),
         BotCommand(command="mydata", description="Мои данные"),
@@ -25,7 +42,15 @@ def get_admin_commands():
         BotCommand(command="announcement", description="Объявление")
     ]
 
-async def set_commands_by_role(bot: Bot, telegram_id: int, role: str):
+async def set_commands_by_role(bot: Bot, telegram_id: int, role: str) -> None:
+    """
+    Устанавливает список команд для пользователя в зависимости от его роли.
+
+    Args:
+        bot (Bot): Экземпляр Telegram-бота.
+        telegram_id (int): Telegram ID пользователя.
+        role (str): Роль пользователя.
+    """
     if role in ["admin", "superadmin"]:
         commands = get_admin_commands()
     else:

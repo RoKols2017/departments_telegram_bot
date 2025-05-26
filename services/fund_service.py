@@ -1,3 +1,6 @@
+"""
+Сервис для управления сборами: создание, поиск, взносы, статус, напоминания.
+"""
 # services/fund_service.py
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
@@ -9,6 +12,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 class FundService:
+    """
+    Сервис для работы со сборами (создание, поиск, взносы, напоминания).
+    Использует SQLAlchemy-сессию для всех операций с БД.
+    """
     def __init__(self, db: Session):
         self.db = db
 

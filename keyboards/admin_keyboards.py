@@ -1,6 +1,16 @@
+"""
+Генерация клавиатуры администратора для Telegram-бота.
+"""
+
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
-def admin_menu():
+def admin_menu() -> ReplyKeyboardMarkup:
+    """
+    Возвращает клавиатуру администратора с основными действиями.
+
+    Returns:
+        ReplyKeyboardMarkup: Клавиатура администратора.
+    """
     return ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="📄 Мои данные"), KeyboardButton(text="🎉 Именинники")],

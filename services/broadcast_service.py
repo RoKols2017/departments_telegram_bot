@@ -1,3 +1,6 @@
+"""
+Сервис для управления рассылками и уведомлениями: создание, отправка, статус.
+"""
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from models import User, Broadcast, Notification
@@ -8,6 +11,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 class BroadcastService:
+    """
+    Сервис для работы с рассылками и уведомлениями (создание, отправка, статус).
+    Использует SQLAlchemy-сессию для всех операций с БД.
+    """
     def __init__(self, db: Session):
         self.db = db
 

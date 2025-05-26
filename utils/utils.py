@@ -1,10 +1,19 @@
+"""
+Вспомогательные функции для форматирования, валидации и генерации команд Telegram-бота.
+"""
+
 from aiogram.types import BotCommand
 from typing import List, Dict, Any
 from datetime import datetime, timedelta
 import re
 
 def setup_bot_commands() -> List[BotCommand]:
-    """Настройка команд бота"""
+    """
+    Возвращает список базовых команд для пользователя.
+
+    Returns:
+        List[BotCommand]: Список команд.
+    """
     commands = [
         BotCommand(command="start", description="Начать работу с ботом"),
         BotCommand(command="menu", description="Главное меню"),
@@ -18,7 +27,12 @@ def setup_bot_commands() -> List[BotCommand]:
     return commands
 
 def setup_treasurer_commands() -> List[BotCommand]:
-    """Команды для казначея"""
+    """
+    Возвращает список команд для казначея.
+
+    Returns:
+        List[BotCommand]: Список команд.
+    """
     commands = [
         BotCommand(command="add_donation", description="Добавить взнос"),
         BotCommand(command="fund_status", description="Статус сбора"),
@@ -28,7 +42,12 @@ def setup_treasurer_commands() -> List[BotCommand]:
     return commands
 
 def setup_admin_commands() -> List[BotCommand]:
-    """Команды для администратора"""
+    """
+    Возвращает список команд для администратора.
+
+    Returns:
+        List[BotCommand]: Список команд.
+    """
     commands = [
         BotCommand(command="add_staff", description="Добавить сотрудника"),
         BotCommand(command="remove_staff", description="Удалить сотрудника"),
@@ -42,7 +61,12 @@ def setup_admin_commands() -> List[BotCommand]:
     return commands
 
 def setup_superadmin_commands() -> List[BotCommand]:
-    """Команды для суперадминистратора"""
+    """
+    Возвращает список команд для суперадминистратора.
+
+    Returns:
+        List[BotCommand]: Список команд.
+    """
     commands = [
         BotCommand(command="promote_user", description="Назначить админом"),
         BotCommand(command="demote_admin", description="Снять с админов"),
@@ -51,24 +75,64 @@ def setup_superadmin_commands() -> List[BotCommand]:
     return commands
 
 def validate_employee_id(employee_id: str) -> bool:
-    """Проверка корректности табельного номера"""
+    """
+    Проверяет корректность табельного номера (6 цифр).
+
+    Args:
+        employee_id (str): Табельный номер.
+
+    Returns:
+        bool: True, если номер корректен.
+    """
     pattern = r'^\d{6}$'  # Шесть цифр
     return bool(re.match(pattern, employee_id))
 
 def format_money(amount: float) -> str:
-    """Форматирование денежной суммы"""
+    """
+    Форматирует денежную сумму с разделителем тысяч и знаком рубля.
+
+    Args:
+        amount (float): Сумма.
+
+    Returns:
+        str: Отформатированная сумма.
+    """
     return f"{amount:,.2f}₽".replace(",", " ")
 
 def format_date(date: datetime) -> str:
-    """Форматирование даты"""
+    """
+    Форматирует дату в строку вида 'ДД.ММ.ГГГГ'.
+
+    Args:
+        date (datetime): Дата.
+
+    Returns:
+        str: Отформатированная дата.
+    """
     return date.strftime("%d.%m.%Y")
 
 def calculate_days_until(target_date: datetime) -> int:
-    """Расчет количества дней до даты"""
+    """
+    Возвращает количество дней до указанной даты.
+
+    Args:
+        target_date (datetime): Целевая дата.
+
+    Returns:
+        int: Количество дней.
+    """
     return (target_date - datetime.now()).days
 
 def format_fund_status(fund_data: Dict[str, Any]) -> str:
-    """Форматирование статуса сбора"""
+    """
+    Форматирует статус сбора для отображения пользователю.
+
+    Args:
+        fund_data (Dict[str, Any]): Данные о сборе.
+
+    Returns:
+        str: Строка со статусом сбора.
+    """
     status = f"📊 Сбор: {fund_data['title']}\n"
     status += f"💰 Цель: {format_money(fund_data['target_amount'])}\n"
     status += f"💵 Собрано: {format_money(fund_data['current_amount'])}\n"
@@ -79,11 +143,29 @@ def format_fund_status(fund_data: Dict[str, Any]) -> str:
     return status
 
 def format_notification(title: str, message: str, created_at: datetime) -> str:
-    """Форматирование уведомления"""
+    """
+    Форматирует уведомление для пользователя.
+
+    Args:
+        title (str): Заголовок.
+        message (str): Сообщение.
+        created_at (datetime): Дата создания.
+
+    Returns:
+        str: Отформатированное уведомление.
+    """
     return f"📬 {title}\n\n{message}\n\nПолучено: {format_date(created_at)}"
 
 def is_valid_amount(amount: str) -> bool:
-    """Проверка корректности суммы"""
+    """
+    Проверяет корректность строки с суммой.
+
+    Args:
+        amount (str): Строка с суммой.
+
+    Returns:
+        bool: True, если сумма корректна.
+    """
     try:
         amount = float(amount.replace(" ", "").replace(",", "."))
         return amount > 0
@@ -91,11 +173,27 @@ def is_valid_amount(amount: str) -> bool:
         return False
 
 def parse_amount(amount: str) -> float:
-    """Преобразование строки в денежную сумму"""
+    """
+    Преобразует строку в число с плавающей точкой (сумму).
+
+    Args:
+        amount (str): Строка с суммой.
+
+    Returns:
+        float: Сумма.
+    """
     return float(amount.replace(" ", "").replace(",", "."))
 
 def get_role_emoji(role: str) -> str:
-    """Получение эмодзи для роли"""
+    """
+    Возвращает эмодзи для роли пользователя.
+
+    Args:
+        role (str): Название роли.
+
+    Returns:
+        str: Эмодзи.
+    """
     role_emojis = {
         "user": "👤",
         "treasurer": "💰",

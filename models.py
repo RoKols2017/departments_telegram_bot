@@ -1,3 +1,7 @@
+"""
+Модели данных SQLAlchemy для корпоративного Telegram-бота.
+Описывают пользователей, роли, сборы, взносы, уведомления и рассылки.
+"""
 # models.py
 from sqlalchemy import Column, Integer, BigInteger, String, Date, DateTime, Float, Boolean, ForeignKey, Text, Enum, JSON, Table
 from sqlalchemy.orm import relationship, declarative_base
@@ -8,10 +12,12 @@ from datetime import datetime
 Base = declarative_base()
 
 class FundType(enum.Enum):
+    """Типы сборов: день рождения или событие."""
     birthday = "birthday"
     event = "event"
 
 class UserRole(enum.Enum):
+    """Роли пользователей в системе."""
     USER = 1
     TREASURER = 2
     ADMIN = 3
@@ -26,6 +32,7 @@ user_roles = Table(
 )
 
 class Staff(Base):
+    """Сотрудник компании (персональные данные, связь с User)."""
     __tablename__ = "staff"
     id = Column(Integer, primary_key=True)
     first_name = Column(String, nullable=False)
@@ -35,6 +42,7 @@ class Staff(Base):
     user = relationship("User", back_populates="staff", uselist=False)
 
 class User(Base):
+    """Пользователь Telegram-бота (привязан к Staff, имеет роли)."""
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
     telegram_id = Column(BigInteger, unique=True, nullable=False)
@@ -58,6 +66,7 @@ class User(Base):
     broadcasts = relationship('Broadcast', back_populates='sender')
 
 class Role(Base):
+    """Роль пользователя (user, treasurer, admin, superadmin)."""
     __tablename__ = 'roles'
     
     id = Column(Integer, primary_key=True)
@@ -68,6 +77,7 @@ class Role(Base):
     users = relationship('User', secondary=user_roles, back_populates='roles')
 
 class GiftFund(Base):
+    """Сбор на подарок (ДР или событие), отдельная сущность для подарков."""
     __tablename__ = "gift_funds"
     id = Column(Integer, primary_key=True)
     type = Column(Enum(FundType), nullable=False)
@@ -86,6 +96,7 @@ class GiftFund(Base):
     treasury = relationship("User", foreign_keys=[treasury_user_id])
 
 class Log(Base):
+    """Лог действий пользователя."""
     __tablename__ = "logs"
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
@@ -94,6 +105,7 @@ class Log(Base):
     user = relationship("User", back_populates="logs")
 
 class Fund(Base):
+    """Сбор средств (основная сущность для учёта взносов)."""
     __tablename__ = "funds"
     
     id = Column(Integer, primary_key=True)
@@ -114,6 +126,7 @@ class Fund(Base):
     donations = relationship('Donation', back_populates='fund')
 
 class Donation(Base):
+    """Взнос пользователя в сбор."""
     __tablename__ = "donations"
     
     id = Column(Integer, primary_key=True)
@@ -127,6 +140,7 @@ class Donation(Base):
     donor = relationship('User', back_populates='donations')
 
 class Notification(Base):
+    """Уведомление для пользователя (напоминания, рассылки)."""
     __tablename__ = "notifications"
     
     id = Column(Integer, primary_key=True)
@@ -142,6 +156,7 @@ class Notification(Base):
     user = relationship('User', back_populates='notifications')
 
 class Broadcast(Base):
+    """Рассылка сообщений пользователям."""
     __tablename__ = "broadcasts"
     
     id = Column(Integer, primary_key=True)

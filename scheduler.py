@@ -21,8 +21,19 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from config import REMINDER_HOUR, BIRTHDAY_REMINDER_DAYS, FUND_REMINDER_DAYS
 import logging
+from functools import wraps
 
 logger = logging.getLogger(__name__)
+
+def with_db_session_async(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        session = SessionLocal()
+        try:
+            return await func(*args, session=session, **kwargs)
+        finally:
+            session.close()
+    return wrapper
 
 class NotificationScheduler:
     """
@@ -79,7 +90,8 @@ class NotificationScheduler:
             replace_existing=True
         )
 
-    async def check_upcoming_birthdays(self):
+    @with_db_session_async
+    async def check_upcoming_birthdays(self, session):
         """
         Проверка предстоящих дней рождения и отправка уведомлений.
         
@@ -91,11 +103,9 @@ class NotificationScheduler:
             Exception: При ошибках доступа к БД или отправки уведомлений
         """
         try:
-            db = SessionLocal()
             today = datetime.now()
             future_date = today + timedelta(days=BIRTHDAY_REMINDER_DAYS)
-
-            upcoming_birthdays = db.query(User).filter(
+            upcoming_birthdays = session.query(User).filter(
                 and_(
                     User.birthday.isnot(None),
                     User.is_active == True
@@ -109,14 +119,13 @@ class NotificationScheduler:
 
                 days_until = (birthday_this_year - today).days
                 if 0 <= days_until <= BIRTHDAY_REMINDER_DAYS:
-                    self._create_birthday_notification(db, user, days_until)
+                    self._create_birthday_notification(session, user, days_until)
 
         except Exception as e:
             logger.error(f"Error in birthday check: {e}")
-        finally:
-            db.close()
 
-    async def check_fund_deadlines(self):
+    @with_db_session_async
+    async def check_fund_deadlines(self, session):
         """
         Проверка дедлайнов сборов и отправка уведомлений.
         
@@ -128,11 +137,9 @@ class NotificationScheduler:
             Exception: При ошибках доступа к БД или отправки уведомлений
         """
         try:
-            db = SessionLocal()
             today = datetime.now()
             deadline_date = today + timedelta(days=FUND_REMINDER_DAYS)
-
-            upcoming_deadlines = db.query(Fund).filter(
+            upcoming_deadlines = session.query(Fund).filter(
                 and_(
                     Fund.is_active == True,
                     Fund.end_date <= deadline_date,
@@ -142,14 +149,13 @@ class NotificationScheduler:
 
             for fund in upcoming_deadlines:
                 days_until = (fund.end_date - today).days
-                self._create_fund_deadline_notification(db, fund, days_until)
+                self._create_fund_deadline_notification(session, fund, days_until)
 
         except Exception as e:
             logger.error(f"Error in fund deadline check: {e}")
-        finally:
-            db.close()
 
-    async def remind_unpaid_participants(self):
+    @with_db_session_async
+    async def remind_unpaid_participants(self, session):
         """
         Отправка напоминаний неплательщикам.
         
@@ -161,16 +167,15 @@ class NotificationScheduler:
             Exception: При ошибках доступа к БД или отправки уведомлений
         """
         try:
-            db = SessionLocal()
-            active_funds = db.query(Fund).filter(Fund.is_active == True).all()
+            active_funds = session.query(Fund).filter(Fund.is_active == True).all()
 
             for fund in active_funds:
-                paid_users = db.query(Donation.donor_id).filter(
+                paid_users = session.query(Donation.donor_id).filter(
                     Donation.fund_id == fund.id
                 ).distinct().all()
                 paid_user_ids = [user[0] for user in paid_users]
 
-                unpaid_users = db.query(User).filter(
+                unpaid_users = session.query(User).filter(
                     and_(
                         User.is_active == True,
                         ~User.id.in_(paid_user_ids)
@@ -178,14 +183,13 @@ class NotificationScheduler:
                 ).all()
 
                 for user in unpaid_users:
-                    self._create_unpaid_notification(db, fund, user)
+                    self._create_unpaid_notification(session, fund, user)
 
         except Exception as e:
             logger.error(f"Error in unpaid reminder check: {e}")
-        finally:
-            db.close()
 
-    async def send_scheduled_broadcasts(self):
+    @with_db_session_async
+    async def send_scheduled_broadcasts(self, session):
         """
         Отправка запланированных рассылок.
         
@@ -196,10 +200,8 @@ class NotificationScheduler:
             Exception: При ошибках доступа к БД или отправки уведомлений
         """
         try:
-            db = SessionLocal()
             now = datetime.now()
-
-            scheduled_notifications = db.query(Notification).filter(
+            scheduled_notifications = session.query(Notification).filter(
                 and_(
                     Notification.scheduled_for <= now,
                     Notification.is_read == False
@@ -210,12 +212,10 @@ class NotificationScheduler:
                 await self._send_notification(notification)
                 notification.is_read = True
 
-            db.commit()
+            session.commit()
 
         except Exception as e:
             logger.error(f"Error in scheduled broadcasts: {e}")
-        finally:
-            db.close()
 
     def _create_birthday_notification(self, db: Session, birthday_person: User, days_until: int):
         """
@@ -295,52 +295,46 @@ class NotificationScheduler:
         """Остановка планировщика задач."""
         self.scheduler.shutdown()
 
-async def birthday_reminder(bot: Bot):
+@with_db_session_async
+async def birthday_reminder(bot: Bot, session):
     """
     Отправка напоминаний о предстоящих днях рождения администраторам.
     
     Args:
         bot (Bot): Экземпляр бота для отправки сообщений
     """
-    session = SessionLocal()
-    try:
-        birthdays = get_upcoming_birthdays()
-        if not birthdays:
-            return
-        admins = UserService(session).get_admins()
-        for staff in birthdays:
-            text = f"🎂 Внимание! Через 10 дней день рождения: {staff.first_name} {staff.patronymic} ({staff.birthday.strftime('%d.%m.%Y')})"
-            for admin in admins:
-                try:
-                    await bot.send_message(admin.telegram_id, text)
-                except:
-                    continue
-    finally:
-        session.close()
+    birthdays = get_upcoming_birthdays(session)
+    if not birthdays:
+        return
+    admins = UserService(session).get_admins()
+    for staff in birthdays:
+        text = f"🎂 Внимание! Через 10 дней день рождения: {staff.first_name} {staff.patronymic} ({staff.birthday.strftime('%d.%m.%Y')})"
+        for admin in admins:
+            try:
+                await bot.send_message(admin.telegram_id, text)
+            except:
+                continue
 
-async def fund_deadline_reminder(bot: Bot):
+@with_db_session_async
+async def fund_deadline_reminder(bot: Bot, session):
     """
     Отправка напоминаний казначеям о приближающихся дедлайнах сборов.
     
     Args:
         bot (Bot): Экземпляр бота для отправки сообщений
     """
-    session = SessionLocal()
-    try:
-        funds = FundService(session).get_funds_near_deadline()
-        if not funds:
-            return
-        for fund in funds:
-            treasurer: User = session.query(User).get(fund.treasury_user_id)
-            if not treasurer:
-                continue
-            try:
-                await bot.send_message(treasurer.telegram_id,
-                    f"⏰ Напоминание: через {3} дня дедлайн по сбору №{fund.id}")
-            except:
-                continue
-    finally:
-        session.close()
+    funds = FundService(session).get_funds_near_deadline()
+    if not funds:
+        return
+    for fund in funds:
+        treasurer: User = session.query(User).get(fund.treasury_user_id)
+        if not treasurer:
+            continue
+        try:
+            await bot.send_message(treasurer.telegram_id,
+                f"⏰ Напоминание: через {3} дня дедлайн по сбору №{fund.id}")
+        except:
+            continue
 
 def setup_scheduler(bot: Bot):
     """

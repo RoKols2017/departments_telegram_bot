@@ -1,3 +1,7 @@
+"""
+Генерация различных клавиатур (reply и inline) для Telegram-бота с учётом ролей и сценариев.
+"""
+
 from aiogram.types import (
     ReplyKeyboardMarkup,
     KeyboardButton,
@@ -7,7 +11,15 @@ from aiogram.types import (
 from typing import List, Optional
 
 def get_main_keyboard(roles: List[str]) -> ReplyKeyboardMarkup:
-    """Главная клавиатура с учетом ролей пользователя"""
+    """
+    Главная клавиатура с учётом ролей пользователя.
+
+    Args:
+        roles (List[str]): Список ролей пользователя.
+
+    Returns:
+        ReplyKeyboardMarkup: Клавиатура главного меню.
+    """
     buttons = [
         [KeyboardButton(text="📊 Активные сборы"), KeyboardButton(text="🎂 Именинники")],
         [KeyboardButton(text="💰 Мои взносы"), KeyboardButton(text="📬 Уведомления")]
@@ -26,7 +38,15 @@ def get_main_keyboard(roles: List[str]) -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True)
 
 def get_treasurer_keyboard(fund_id: Optional[int] = None) -> InlineKeyboardMarkup:
-    """Клавиатура казначея"""
+    """
+    Клавиатура казначея для управления сборами.
+
+    Args:
+        fund_id (Optional[int]): Идентификатор сбора (если есть).
+
+    Returns:
+        InlineKeyboardMarkup: Клавиатура казначея.
+    """
     buttons = []
     
     if fund_id:
@@ -45,7 +65,12 @@ def get_treasurer_keyboard(fund_id: Optional[int] = None) -> InlineKeyboardMarku
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 def get_admin_keyboard() -> InlineKeyboardMarkup:
-    """Клавиатура администратора"""
+    """
+    Клавиатура администратора для управления сотрудниками и сборами.
+
+    Returns:
+        InlineKeyboardMarkup: Клавиатура администратора.
+    """
     buttons = [
         [
             InlineKeyboardButton(text="➕ Добавить сотрудника", callback_data="add_staff"),
@@ -66,7 +91,12 @@ def get_admin_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 def get_superadmin_keyboard() -> InlineKeyboardMarkup:
-    """Клавиатура суперадминистратора"""
+    """
+    Клавиатура суперадминистратора для управления ролями и пользователями.
+
+    Returns:
+        InlineKeyboardMarkup: Клавиатура суперадминистратора.
+    """
     buttons = [
         [
             InlineKeyboardButton(text="👑 Назначить админа", callback_data="promote_admin"),
@@ -82,7 +112,15 @@ def get_superadmin_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 def get_fund_list_keyboard(funds: List[dict]) -> InlineKeyboardMarkup:
-    """Клавиатура со списком сборов"""
+    """
+    Клавиатура со списком сборов.
+
+    Args:
+        funds (List[dict]): Список сборов.
+
+    Returns:
+        InlineKeyboardMarkup: Клавиатура со списком сборов.
+    """
     buttons = []
     for fund in funds:
         buttons.append([
@@ -94,7 +132,16 @@ def get_fund_list_keyboard(funds: List[dict]) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 def get_confirmation_keyboard(action: str, item_id: int) -> InlineKeyboardMarkup:
-    """Клавиатура подтверждения действия"""
+    """
+    Клавиатура подтверждения действия (Да/Нет).
+
+    Args:
+        action (str): Действие.
+        item_id (int): Идентификатор объекта.
+
+    Returns:
+        InlineKeyboardMarkup: Клавиатура подтверждения.
+    """
     buttons = [
         [
             InlineKeyboardButton(text="✅ Да", callback_data=f"confirm_{action}:{item_id}"),
@@ -104,7 +151,15 @@ def get_confirmation_keyboard(action: str, item_id: int) -> InlineKeyboardMarkup
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 def get_notification_keyboard(notification_id: int) -> InlineKeyboardMarkup:
-    """Клавиатура для уведомления"""
+    """
+    Клавиатура для уведомления пользователя.
+
+    Args:
+        notification_id (int): Идентификатор уведомления.
+
+    Returns:
+        InlineKeyboardMarkup: Клавиатура для уведомления.
+    """
     buttons = [
         [
             InlineKeyboardButton(text="✅ Прочитано", callback_data=f"read_notification:{notification_id}"),
@@ -114,7 +169,12 @@ def get_notification_keyboard(notification_id: int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 def get_broadcast_type_keyboard() -> InlineKeyboardMarkup:
-    """Клавиатура выбора типа рассылки"""
+    """
+    Клавиатура выбора типа рассылки.
+
+    Returns:
+        InlineKeyboardMarkup: Клавиатура выбора типа рассылки.
+    """
     buttons = [
         [
             InlineKeyboardButton(text="👥 Всем", callback_data="broadcast_all"),
@@ -127,7 +187,15 @@ def get_broadcast_type_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 def get_back_keyboard(callback_data: str = "back") -> InlineKeyboardMarkup:
-    """Клавиатура с кнопкой "Назад\""""
+    """
+    Клавиатура с кнопкой "Назад".
+
+    Args:
+        callback_data (str): Callback-данные для кнопки.
+
+    Returns:
+        InlineKeyboardMarkup: Клавиатура с кнопкой "Назад".
+    """
     return InlineKeyboardMarkup(
         inline_keyboard=[[InlineKeyboardButton(text="🔙 Назад", callback_data=callback_data)]]
     ) 

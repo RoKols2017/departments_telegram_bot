@@ -12,41 +12,33 @@ def role_required(roles: list[str]):
     """
     def decorator(handler):
         @wraps(handler)
-        async def wrapper(message: types.Message, *args, **kwargs):
-            session = SessionLocal()
-            try:
-                user = session.query(User).filter_by(telegram_id=message.from_user.id).first()
-                if not user:
-                    await message.answer("❌ Вы не зарегистрированы.")
-                    return
+        async def wrapper(message: types.Message, session, *args, **kwargs):
+            user = session.query(User).filter_by(telegram_id=message.from_user.id).first()
+            if not user:
+                await message.answer("❌ Вы не зарегистрированы.")
+                return
 
-                if user.role not in roles:
-                    await message.answer("⛔ Нет доступа к этой команде.")
-                    return
+            if user.role not in roles:
+                await message.answer("⛔ Нет доступа к этой команде.")
+                return
 
-                return await handler(message, user, *args, **kwargs)
-            finally:
-                session.close()
+            return await handler(message, session, user, *args, **kwargs)
         return wrapper
     return decorator
 
 
 def ensure_registered():
     """
-    Проверка регистрации
+    Проверка регистрации. Ожидает, что session уже передан как второй аргумент.
     """
     def decorator(handler):
         @wraps(handler)
-        async def wrapper(message: types.Message, *args, **kwargs):
-            session = SessionLocal()
-            try:
-                user = session.query(User).filter_by(telegram_id=message.from_user.id).first()
-                if not user:
-                    await message.answer("❌ Вы не зарегистрированы. Введите /start для регистрации.")
-                    return
-                return await handler(message, user, *args, **kwargs)
-            finally:
-                session.close()
+        async def wrapper(message, session, *args, **kwargs):
+            user = session.query(User).filter_by(telegram_id=message.from_user.id).first()
+            if not user:
+                await message.answer("❌ Вы не зарегистрированы. Введите /start для регистрации.")
+                return
+            return await handler(message, session, user, *args, **kwargs)
         return wrapper
     return decorator
 
@@ -57,13 +49,24 @@ def log_action(action_name: str):
     """
     def decorator(handler):
         @wraps(handler)
-        async def wrapper(message: types.Message, *args, **kwargs):
-            session = SessionLocal()
-            try:
-                session.add(Log(user_id=message.from_user.id, action=action_name, timestamp=datetime.utcnow()))
-                session.commit()
-            finally:
-                session.close()
-            return await handler(message, *args, **kwargs)
+        async def wrapper(message: types.Message, session, *args, **kwargs):
+            session.add(Log(user_id=message.from_user.id, action=action_name, timestamp=datetime.utcnow()))
+            session.commit()
+            return await handler(message, session, *args, **kwargs)
         return wrapper
     return decorator
+
+
+def with_db_session(handler):
+    """
+    Декоратор для автоматического создания и закрытия сессии БД в aiogram-обработчиках.
+    Передаёт session как второй аргумент в handler.
+    """
+    @wraps(handler)
+    async def wrapper(message, *args, **kwargs):
+        session = SessionLocal()
+        try:
+            return await handler(message, session, *args, **kwargs)
+        finally:
+            session.close()
+    return wrapper
