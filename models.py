@@ -1,5 +1,5 @@
 # models.py
-from sqlalchemy import Column, Integer, String, Date, DateTime, Float, Boolean, ForeignKey, Text, Enum, JSON, Table
+from sqlalchemy import Column, Integer, BigInteger, String, Date, DateTime, Float, Boolean, ForeignKey, Text, Enum, JSON, Table
 from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.sql import func
 import enum
@@ -37,7 +37,7 @@ class Staff(Base):
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
-    telegram_id = Column(Integer, unique=True, nullable=False)
+    telegram_id = Column(BigInteger, unique=True, nullable=False)
     username = Column(String)
     employee_id = Column(String, unique=True, nullable=False)  # Табельный номер
     full_name = Column(String)
@@ -45,11 +45,17 @@ class User(Base):
     birthday = Column(DateTime)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=func.now())
+    staff_id = Column(Integer, ForeignKey("staff.id"), nullable=True, unique=True)
+    staff = relationship("Staff", back_populates="user", uselist=False)
     
     # Отношения
     roles = relationship('Role', secondary=user_roles, back_populates='users')
-    managed_funds = relationship('Fund', back_populates='treasurer')
+    managed_funds = relationship('Fund', back_populates='treasurer', foreign_keys='Fund.treasurer_id')
+    birthday_funds = relationship('Fund', back_populates='birthday_person', foreign_keys='Fund.birthday_person_id')
     donations = relationship('Donation', back_populates='donor')
+    logs = relationship('Log', back_populates='user')
+    notifications = relationship('Notification', back_populates='user')
+    broadcasts = relationship('Broadcast', back_populates='sender')
 
 class Role(Base):
     __tablename__ = 'roles'
@@ -103,9 +109,9 @@ class Fund(Base):
     treasurer_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     
     # Отношения
-    treasurer = relationship('User', back_populates='managed_funds')
+    treasurer = relationship('User', back_populates='managed_funds', foreign_keys=[treasurer_id])
+    birthday_person = relationship('User', back_populates='birthday_funds', foreign_keys=[birthday_person_id])
     donations = relationship('Donation', back_populates='fund')
-    birthday_person = relationship('User', foreign_keys=[birthday_person_id])
 
 class Donation(Base):
     __tablename__ = "donations"
@@ -133,7 +139,7 @@ class Notification(Base):
     scheduled_for = Column(DateTime)
     
     # Отношения
-    user = relationship('User')
+    user = relationship('User', back_populates='notifications')
 
 class Broadcast(Base):
     __tablename__ = "broadcasts"
@@ -148,4 +154,4 @@ class Broadcast(Base):
     scheduled_for = Column(DateTime, nullable=True)
     
     # Отношения
-    sender = relationship('User')
+    sender = relationship('User', back_populates='broadcasts')

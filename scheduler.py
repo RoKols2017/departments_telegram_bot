@@ -11,8 +11,8 @@
 from aiogram import Bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from services.birthday_service import get_upcoming_birthdays
-from services.fund_service import get_funds_near_deadline
-from services.user_service import get_admins
+from services.fund_service import FundService
+from services.user_service import UserService
 from database import SessionLocal
 from models import User, Fund, Notification, Donation
 from datetime import datetime, timedelta
@@ -307,7 +307,7 @@ async def birthday_reminder(bot: Bot):
         birthdays = get_upcoming_birthdays()
         if not birthdays:
             return
-        admins = get_admins()
+        admins = UserService(session).get_admins()
         for staff in birthdays:
             text = f"🎂 Внимание! Через 10 дней день рождения: {staff.first_name} {staff.patronymic} ({staff.birthday.strftime('%d.%m.%Y')})"
             for admin in admins:
@@ -327,7 +327,7 @@ async def fund_deadline_reminder(bot: Bot):
     """
     session = SessionLocal()
     try:
-        funds = get_funds_near_deadline()
+        funds = FundService(session).get_funds_near_deadline()
         if not funds:
             return
         for fund in funds:

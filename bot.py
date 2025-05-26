@@ -11,6 +11,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.client.session.aiohttp import AiohttpSession
+from aiogram.client.default import DefaultBotProperties
 from config import BOT_TOKEN
 from database import init_db
 from utils.middleware import AntiSpamMiddleware, LoggingMiddleware
@@ -51,7 +52,7 @@ async def main() -> None:
     session = AiohttpSession()
     
     # Инициализация бота и диспетчера
-    bot = Bot(token=BOT_TOKEN, parse_mode=ParseMode.HTML, session=session)
+    bot = Bot(token=BOT_TOKEN, session=session, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     storage = MemoryStorage()
     dp = Dispatcher(storage=storage)
     

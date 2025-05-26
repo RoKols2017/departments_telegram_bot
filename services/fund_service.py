@@ -168,3 +168,15 @@ class FundService:
             })
         
         return result
+
+    def get_funds_near_deadline(self, days: int = 3) -> List[Fund]:
+        """Получение сборов с дедлайном в ближайшие days дней"""
+        today = datetime.now()
+        deadline_date = today + timedelta(days=days)
+        return self.db.query(Fund).filter(
+            and_(
+                Fund.is_active == True,
+                Fund.end_date <= deadline_date,
+                Fund.end_date > today
+            )
+        ).all()
