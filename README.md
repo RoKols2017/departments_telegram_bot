@@ -1,4 +1,4 @@
-# telegram_bot_v1_secure 
+# telegram_bot_v1_secure (aiogram)
 # Корпоративный Telegram-бот для учета сотрудников, организации сборов и автоматизации оповещений.
 
 ## Описание
