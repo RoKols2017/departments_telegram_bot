@@ -1,0 +1,35 @@
+# Токен Telegram-бота
+BOT_TOKEN=TOKEN
+
+# Telegram ID суперадмина
+SUPERADMIN_ID=344234718
+
+# Тип используемой БД (sqlite или postgresql)
+DB_TYPE=sqlite
+
+# Имя базы данных (для sqlite — имя файла, для postgresql — имя БД)
+DB_NAME=database
+
+# Имя пользователя для подключения к БД (актуально для postgresql)
+DB_USER=user
+
+# Пароль пользователя БД (актуально для postgresql)
+DB_PASSWORD=password
+
+# Хост БД (актуально для postgresql)
+DB_HOST=localhost
+
+# Порт БД (актуально для postgresql)
+DB_PORT=5432
+
+# Уровень логирования (DEBUG, INFO, WARNING, ERROR)
+LOG_LEVEL=INFO
+
+# В котором часу отправлять напоминания (0-23)
+REMINDER_HOUR=10
+
+# За сколько дней до дня рождения напоминать
+BIRTHDAY_REMINDER_DAYS=3
+
+# За сколько дней до дедлайна сбора напоминать казначею
+FUND_REMINDER_DAYS=2
