@@ -1,28 +1,30 @@
-from aiogram import Router, F, types
+from aiogram import Router, types
 from aiogram.filters import Command
-from database import SessionLocal
-from models import User
-from utils import get_birthday_staff_ids
-from keyboards import user_menu, get_menu_by_role
-from utils.decorators import with_db_session
+from utils.decorators import with_db_session_async
+from services.user_service import UserService
+from keyboards import get_menu_by_role
 
 router = Router()
 
+
 @router.message(Command("menu"))
-@router.message(F.text == "📄 Мои данные")  # кнопка
-@with_db_session
+@router.message(types.Message.text == "📄 Мои данные")  # кнопка
+@with_db_session_async
 async def show_menu(message: types.Message, session):
-    user = session.query(User).filter_by(telegram_id=message.from_user.id).first()
+    user_service = UserService(session)
+    user = await user_service.get_user_by_telegram_id(message.from_user.id)
     if user:
         await message.answer("Меню:", reply_markup=get_menu_by_role(user.role))
     else:
         await message.answer("Вы не зарегистрированы.")
 
+
 @router.message(Command("mydata"))
-@router.message(F.text == "📄 Мои данные")
-@with_db_session
+@router.message(types.Message.text == "📄 Мои данные")
+@with_db_session_async
 async def show_my_data(message: types.Message, session):
-    user = session.query(User).filter_by(telegram_id=message.from_user.id).first()
+    user_service = UserService(session)
+    user = await user_service.get_user_by_telegram_id(message.from_user.id)
     if not user:
         await message.answer("Вы не зарегистрированы.")
         return

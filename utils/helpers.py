@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from models import Staff, Log
 from typing import List
 
+
 def get_birthday_staff_ids(session: Session, month_list: List[int]) -> List[int]:
     """
     Возвращает список ID сотрудников, у которых день рождения в указанных месяцах.
@@ -18,7 +19,12 @@ def get_birthday_staff_ids(session: Session, month_list: List[int]) -> List[int]
     Returns:
         List[int]: Список ID сотрудников.
     """
-    return [s.id for s in session.query(Staff).all() if s.birthday and s.birthday.month in month_list]
+    return [
+        s.id
+        for s in session.query(Staff).all()
+        if s.birthday and s.birthday.month in month_list
+    ]
+
 
 def format_date(date: datetime) -> str:
     """
@@ -30,7 +36,8 @@ def format_date(date: datetime) -> str:
     Returns:
         str: Отформатированная дата.
     """
-    return date.strftime('%d.%m.%Y')
+    return date.strftime("%d.%m.%Y")
+
 
 def safe_log(session: Session, user_id: int, action: str) -> None:
     """
@@ -43,6 +50,7 @@ def safe_log(session: Session, user_id: int, action: str) -> None:
     """
     session.add(Log(user_id=user_id, action=action, timestamp=datetime.utcnow()))
     session.commit()
+
 
 def is_admin(role: str) -> bool:
     """

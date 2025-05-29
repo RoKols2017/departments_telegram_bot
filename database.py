@@ -1,8 +1,8 @@
 # database.py
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
 from config import DATABASE_URL
+from models.base import Base
 import logging
 from alembic.config import Config
 from alembic import command
@@ -11,26 +11,19 @@ from pathlib import Path
 # Настройка логгера
 logger = logging.getLogger(__name__)
 
-# Создание движка базы данных
-engine = create_engine(DATABASE_URL, echo=True)
+# Асинхронный движок
+engine = create_async_engine(DATABASE_URL, echo=True, future=True)
 
-# Создание фабрики сессий
-session_factory = sessionmaker(bind=engine)
-SessionLocal = scoped_session(session_factory)
+# Фабрика асинхронных сессий
+async_session_factory = sessionmaker(
+    engine, expire_on_commit=False, class_=AsyncSession
+)
 
-# Базовый класс для моделей
-Base = declarative_base()
+# Экспортируем для использования в сервисах
+__all__ = ["engine", "async_session_factory", "Base"]
 
-def get_db():
-    """
-    Генератор для получения сессии базы данных.
-    Гарантирует закрытие сессии после использования.
-    """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# Функции инициализации и Alembic оставлены для ручного вызова или переписывания отдельно при необходимости
+
 
 def init_db():
     """
@@ -42,22 +35,23 @@ def init_db():
         # Создание директории для миграций, если её нет
         migrations_dir = Path("migrations")
         migrations_dir.mkdir(exist_ok=True)
-        
+
         # Настройка Alembic
         alembic_cfg = Config()
         alembic_cfg.set_main_option("script_location", str(migrations_dir))
         alembic_cfg.set_main_option("sqlalchemy.url", DATABASE_URL)
-        
+
         # Создание таблиц
-        Base.metadata.create_all(bind=engine)
-        
+        await Base.metadata.create_all(bind=engine)
+
         # Применение миграций
-        command.upgrade(alembic_cfg, "head")
-        
+        await command.upgrade(alembic_cfg, "head")
+
         logger.info("Database initialized successfully")
     except Exception as e:
         logger.error(f"Error initializing database: {e}")
         raise
+
 
 def get_engine():
     """

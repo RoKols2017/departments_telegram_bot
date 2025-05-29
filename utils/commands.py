@@ -3,8 +3,13 @@
 """
 
 from aiogram import Bot
-from aiogram.types import BotCommand, BotCommandScopeAllPrivateChats, BotCommandScopeChat
+from aiogram.types import (
+    BotCommand,
+    BotCommandScopeAllPrivateChats,
+    BotCommandScopeChat,
+)
 from typing import List
+
 
 def get_default_commands() -> List[BotCommand]:
     """
@@ -17,8 +22,9 @@ def get_default_commands() -> List[BotCommand]:
         BotCommand(command="menu", description="Открыть меню"),
         BotCommand(command="mydata", description="Мои данные"),
         BotCommand(command="birthdays", description="Именинники"),
-        BotCommand(command="active_funds", description="Активные сборы")
+        BotCommand(command="active_funds", description="Активные сборы"),
     ]
+
 
 def get_admin_commands() -> List[BotCommand]:
     """
@@ -38,9 +44,12 @@ def get_admin_commands() -> List[BotCommand]:
         BotCommand(command="create_event_fund", description="Создать сбор (Событие)"),
         BotCommand(command="assign_treasurer", description="Назначить казначея"),
         BotCommand(command="broadcast", description="Рассылка всем"),
-        BotCommand(command="birthday_broadcast", description="Рассылка без именинников"),
-        BotCommand(command="announcement", description="Объявление")
+        BotCommand(
+            command="birthday_broadcast", description="Рассылка без именинников"
+        ),
+        BotCommand(command="announcement", description="Объявление"),
     ]
+
 
 async def set_commands_by_role(bot: Bot, telegram_id: int, role: str) -> None:
     """

@@ -7,6 +7,7 @@ from typing import List, Dict, Any
 from datetime import datetime, timedelta
 import re
 
+
 def setup_bot_commands() -> List[BotCommand]:
     """
     Возвращает список базовых команд для пользователя.
@@ -22,9 +23,10 @@ def setup_bot_commands() -> List[BotCommand]:
         BotCommand(command="birthdays", description="Список именинников"),
         BotCommand(command="active_funds", description="Активные сборы"),
         BotCommand(command="my_donations", description="Мои взносы"),
-        BotCommand(command="notifications", description="Мои уведомления")
+        BotCommand(command="notifications", description="Мои уведомления"),
     ]
     return commands
+
 
 def setup_treasurer_commands() -> List[BotCommand]:
     """
@@ -37,9 +39,10 @@ def setup_treasurer_commands() -> List[BotCommand]:
         BotCommand(command="add_donation", description="Добавить взнос"),
         BotCommand(command="fund_status", description="Статус сбора"),
         BotCommand(command="remind_unpaid", description="Напомнить о взносе"),
-        BotCommand(command="close_fund", description="Закрыть сбор")
+        BotCommand(command="close_fund", description="Закрыть сбор"),
     ]
     return commands
+
 
 def setup_admin_commands() -> List[BotCommand]:
     """
@@ -55,10 +58,13 @@ def setup_admin_commands() -> List[BotCommand]:
         BotCommand(command="create_event_fund", description="Создать сбор на событие"),
         BotCommand(command="assign_treasurer", description="Назначить казначея"),
         BotCommand(command="broadcast", description="Создать рассылку"),
-        BotCommand(command="birthday_broadcast", description="Рассылка без именинников"),
-        BotCommand(command="announcement", description="Объявление")
+        BotCommand(
+            command="birthday_broadcast", description="Рассылка без именинников"
+        ),
+        BotCommand(command="announcement", description="Объявление"),
     ]
     return commands
+
 
 def setup_superadmin_commands() -> List[BotCommand]:
     """
@@ -70,9 +76,10 @@ def setup_superadmin_commands() -> List[BotCommand]:
     commands = [
         BotCommand(command="promote_user", description="Назначить админом"),
         BotCommand(command="demote_admin", description="Снять с админов"),
-        BotCommand(command="remove_user", description="Удалить пользователя")
+        BotCommand(command="remove_user", description="Удалить пользователя"),
     ]
     return commands
+
 
 def validate_employee_id(employee_id: str) -> bool:
     """
@@ -84,8 +91,9 @@ def validate_employee_id(employee_id: str) -> bool:
     Returns:
         bool: True, если номер корректен.
     """
-    pattern = r'^\d{6}$'  # Шесть цифр
+    pattern = r"^\d{6}$"  # Шесть цифр
     return bool(re.match(pattern, employee_id))
+
 
 def format_money(amount: float) -> str:
     """
@@ -99,6 +107,7 @@ def format_money(amount: float) -> str:
     """
     return f"{amount:,.2f}₽".replace(",", " ")
 
+
 def format_date(date: datetime) -> str:
     """
     Форматирует дату в строку вида 'ДД.ММ.ГГГГ'.
@@ -111,6 +120,7 @@ def format_date(date: datetime) -> str:
     """
     return date.strftime("%d.%m.%Y")
 
+
 def calculate_days_until(target_date: datetime) -> int:
     """
     Возвращает количество дней до указанной даты.
@@ -122,6 +132,7 @@ def calculate_days_until(target_date: datetime) -> int:
         int: Количество дней.
     """
     return (target_date - datetime.now()).days
+
 
 def format_fund_status(fund_data: Dict[str, Any]) -> str:
     """
@@ -142,6 +153,7 @@ def format_fund_status(fund_data: Dict[str, Any]) -> str:
     status += f"Статус: {'🟢 Активен' if fund_data['is_active'] else '🔴 Закрыт'}"
     return status
 
+
 def format_notification(title: str, message: str, created_at: datetime) -> str:
     """
     Форматирует уведомление для пользователя.
@@ -155,6 +167,7 @@ def format_notification(title: str, message: str, created_at: datetime) -> str:
         str: Отформатированное уведомление.
     """
     return f"📬 {title}\n\n{message}\n\nПолучено: {format_date(created_at)}"
+
 
 def is_valid_amount(amount: str) -> bool:
     """
@@ -172,6 +185,7 @@ def is_valid_amount(amount: str) -> bool:
     except ValueError:
         return False
 
+
 def parse_amount(amount: str) -> float:
     """
     Преобразует строку в число с плавающей точкой (сумму).
@@ -184,6 +198,7 @@ def parse_amount(amount: str) -> float:
     """
     return float(amount.replace(" ", "").replace(",", "."))
 
+
 def get_role_emoji(role: str) -> str:
     """
     Возвращает эмодзи для роли пользователя.
@@ -194,10 +209,5 @@ def get_role_emoji(role: str) -> str:
     Returns:
         str: Эмодзи.
     """
-    role_emojis = {
-        "user": "👤",
-        "treasurer": "💰",
-        "admin": "🛠",
-        "superadmin": "👑"
-    }
-    return role_emojis.get(role, "❓") 
+    role_emojis = {"user": "👤", "treasurer": "💰", "admin": "🛠", "superadmin": "👑"}
+    return role_emojis.get(role, "❓")

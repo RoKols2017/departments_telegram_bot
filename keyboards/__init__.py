@@ -5,6 +5,7 @@ from .fund_keyboards import treasurer_fund_menu, back_button
 
 __all__ = ["user_menu", "admin_menu", "treasurer_fund_menu", "back_button"]
 
+
 def get_menu_by_role(role: str):
     """
     Возвращает клавиатуру в зависимости от роли пользователя

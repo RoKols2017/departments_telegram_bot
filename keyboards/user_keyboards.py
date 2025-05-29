@@ -5,6 +5,7 @@
 
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
+
 def user_menu() -> ReplyKeyboardMarkup:
     """
     Возвращает клавиатуру пользователя с основными действиями.
@@ -16,7 +17,7 @@ def user_menu() -> ReplyKeyboardMarkup:
         keyboard=[
             [KeyboardButton(text="📄 Мои данные")],
             [KeyboardButton(text="🎉 Именинники")],
-            [KeyboardButton(text="💰 Активные сборы")]
+            [KeyboardButton(text="💰 Активные сборы")],
         ],
-        resize_keyboard=True
+        resize_keyboard=True,
     )
